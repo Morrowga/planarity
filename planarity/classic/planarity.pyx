@@ -541,7 +541,7 @@ cdef class PGraph:
             y = drawplanar_vertex_info['vertex_position']
             xb = drawplanar_vertex_info['vertex_start']
             xe = drawplanar_vertex_info['vertex_end']
-            x = int((xe+xb)/2)
+            x = (xe+xb)/2
             node_labels[node] = (x, y)
             patches += [FancyBboxPatch(
                 (xb, y - 0.25), xe - xb, 0.5,
