@@ -483,7 +483,7 @@ cdef class PGraph:
         return py_bytes.decode('ascii')
 
 
-    def draw(self, bool labels=True, str outfileName=None, dict fig_kwargs=None) -> None:
+    def draw(self, bool labels=True, str outfileName=None, **kwargs) -> None:
         """Draws the graph using Matplotlib, if it is planar.
 
         If the graph is planar, then it is drawn as a figure within
@@ -495,13 +495,14 @@ cdef class PGraph:
             outfileName (:obj:`str`): File to which to output a Matplotlib
                 rendering of the planar graph. If not given, then the caller can
                 call :external+matplotlib:py:func:`matplotlib.pyplot.savefig`.
-            fig_kwargs (:obj:`dict`): Optional dictionary of Matplotlib
-                figure-level parameters (e.g. ``figsize``, ``dpi``) to apply
-                to the current figure after it is cleared. If not given,
-                Matplotlib's default figure size and DPI are used, matching
-                prior behavior.
+            **kwargs: Optional figure-level parameters to apply to the
+                current figure after it is cleared. Supported keys are
+                ``figsize`` and ``dpi``. If none are given, Matplotlib's
+                default figure size and DPI are used, matching prior
+                behavior.
 
         Raises:
+            ValueError: if an unsupported keyword argument is given.
             ImportError: if dependencies from Matplotlib fail to be imported.
             RuntimeError: if an error was encountered by C-layer methods
                 such as ``gp_Embed()``.
@@ -526,12 +527,17 @@ cdef class PGraph:
         plt.clf()
 
         fig = plt.gcf()
-        if fig_kwargs is not None:
-            kwargs = dict(fig_kwargs)
-            if 'figsize' in kwargs:
-                fig.set_size_inches(kwargs.pop('figsize'))
-            if kwargs:
-                fig.set(**kwargs)
+        valid_fig_kwargs = ('figsize', 'dpi')
+        for key, value in kwargs.items():
+            if key not in valid_fig_kwargs:
+                raise ValueError(
+                    f"planarity: '{key}' is not a supported draw() keyword "
+                    f"argument. Supported options are: {valid_fig_kwargs}."
+                )
+            if key == 'figsize':
+                fig.set_size_inches(value)
+            elif key == 'dpi':
+                fig.set_dpi(value)
 
         self.embed_drawplanar()
 
