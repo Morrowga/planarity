@@ -103,7 +103,7 @@ def ascii(graph) -> str:
     return planarity.PGraph(graph).ascii()
 
 
-def draw(graph, labels=True, outfileName=None):
+def draw(graph, labels=True, outfileName=None, **kwargs):
     """Draws the graph with Matplotlib, if it is planar.
 
     Constructs a
@@ -120,10 +120,14 @@ def draw(graph, labels=True, outfileName=None):
         outfileName (:obj:`str`): File to which to output a Matplotlib
             rendering of the planar graph. If not given, then the caller can
             call :external+matplotlib:py:func:`matplotlib.pyplot.savefig`.
+        **kwargs: Optional figure-level parameters forwarded to
+            :py:meth:`~planarity.classic.planarity.PGraph.draw`. Supported
+            keys are ``figsize`` and ``dpi``.
 
     Raises:
         ValueError: if the given graph is already a
             :py:class:`~planarity.classic.planarity.PGraph`.
+        ValueError: if an unsupported keyword argument is given.
         RuntimeError: if the graph couldn't be converted to a
             :py:class:`~planarity.classic.planarity.PGraph`.
         ImportError: if dependencies from Matplotlib fail to be imported.
@@ -137,7 +141,7 @@ def draw(graph, labels=True, outfileName=None):
     pgraph = planarity.PGraph(graph)
 
     try:
-        pgraph.draw(labels, outfileName)
+        pgraph.draw(labels, outfileName, **kwargs)
     except ImportError as import_error:
         raise ImportError(
             "Please install missing dependencies in your current environment "

@@ -483,7 +483,7 @@ cdef class PGraph:
         return py_bytes.decode('ascii')
 
 
-    def draw(self, bool labels=True, str outfileName=None) -> None:
+    def draw(self, bool labels=True, str outfileName=None, **kwargs) -> None:
         """Draws the graph using Matplotlib, if it is planar.
 
         If the graph is planar, then it is drawn as a figure within
@@ -499,8 +499,14 @@ cdef class PGraph:
             outfileName (:obj:`str`): File to which to output a Matplotlib
                 rendering of the planar graph. If not given, then the caller can
                 call :external+matplotlib:py:func:`matplotlib.pyplot.savefig`.
+            **kwargs: Optional figure-level parameters to apply to the
+                current figure after it is cleared. Supported keys are
+                ``figsize`` and ``dpi``. If none are given, Matplotlib's
+                default figure size and DPI are used, matching prior
+                behavior.
 
         Raises:
+            ValueError: if an unsupported keyword argument is given.
             ImportError: if dependencies from Matplotlib fail to be imported.
             RuntimeError: if an error was encountered by C-layer methods
                 such as ``gp_Embed()``.
@@ -524,6 +530,19 @@ cdef class PGraph:
         # method on other PGraphs.
         plt.clf()
 
+        fig = plt.gcf()
+        valid_fig_kwargs = ('figsize', 'dpi')
+        for key, value in kwargs.items():
+            if key not in valid_fig_kwargs:
+                raise ValueError(
+                    f"planarity: '{key}' is not a supported draw() keyword "
+                    f"argument. Supported options are: {valid_fig_kwargs}."
+                )
+            if key == 'figsize':
+                fig.set_size_inches(value)
+            elif key == 'dpi':
+                fig.set_dpi(value)
+
         self.embed_drawplanar()
 
         if self._embedding_workflow_status != cplanarity.OK:
@@ -532,21 +551,19 @@ cdef class PGraph:
                 "planarity: Unable to draw() graph due to error encountered in "
                 "embedding workflow."
             )
-
         patches = []
         node_labels = {}
         vertex_bounds = {}
         xs = []
         ys = []
         # Use tuple unpacking for the list of tuples representing nodes
-
         for node, drawplanar_vertex_info in self.nodes(
             include_drawplanar_vertex_info=True
         ):
             y = drawplanar_vertex_info['vertex_position']
             xb = drawplanar_vertex_info['vertex_start']
             xe = drawplanar_vertex_info['vertex_end']
-            x = int((xe+xb)/2)
+            x = (xe+xb)/2
             node_labels[node] = (x, y)
             vertex_bounds[node] = (xb, xe)
             patches += [FancyBboxPatch(
@@ -617,19 +634,21 @@ cdef class PGraph:
                     ).transformed(inv)
 
         if outfileName:
-            plt.savefig(outfileName)
+            plt.savefig(outfileName, dpi=fig.dpi)
 
-    def write(self, str path='stdout', int writeMode=cplanarity.WRITE_ADJLIST) -> None:
+    def write(
+        self, str path='stdout', int writeMode=cplanarity.WRITE_ADJLIST
+    ) -> None:
         """Writes the graph to ``path``.
 
-        Supports writing in formats: WRITE_ADJLIST, WRITE_ADJMATRIX, and WRITE_G6.
+        Supports writing in formats: ``WRITE_ADJLIST``, ``WRITE_ADJMATRIX``, and
+        ``WRITE_G6``.
 
         Args:
             path (str): Path to which to write graph. Defaults to ``stdout``
                 stream.
             writeMode (int): Format to write the graph. Defaults to
-                ``cplanarity.WRITE_ADJLIST``.
-
+                ``WRITE_ADJLIST``.
         Raises:
             RuntimeError: if the C-layer ``gp_Write()`` failed.
         """
