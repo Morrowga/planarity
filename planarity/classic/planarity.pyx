@@ -558,7 +558,7 @@ cdef class PGraph:
             y = drawplanar_vertex_info['vertex_position']
             xb = drawplanar_vertex_info['vertex_start']
             xe = drawplanar_vertex_info['vertex_end']
-            x = int((xe+xb)/2)
+            x = (xe+xb)/2
             node_labels[node] = (x, y)
             patches += [FancyBboxPatch(
                 (xb, y - 0.25), xe - xb, 0.5,
@@ -605,11 +605,19 @@ cdef class PGraph:
         if outfileName:
             plt.savefig(outfileName, dpi=fig.dpi)
 
-    def write(self, str path='stdout', int writeMode=cplanarity.WRITE_ADJLIST) -> None:
+    def write(
+        self, str path='stdout', int writeMode=cplanarity.WRITE_ADJLIST
+    ) -> None:
         """Writes the graph to ``path``.
 
-        Supports writing in formats: WRITE_ADJLIST, WRITE_ADJMATRIX, and WRITE_G6.
+        Supports writing in formats: ``WRITE_ADJLIST``, ``WRITE_ADJMATRIX``, and
+        ``WRITE_G6``.
 
+        Args:
+            path (str): Path to which to write graph. Defaults to ``stdout``
+                stream.
+            writeMode (int): Format to write the graph. Defaults to
+                ``WRITE_ADJLIST``.
         Raises:
             RuntimeError: if the C-layer ``gp_Write()`` failed.
         """

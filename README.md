@@ -61,6 +61,12 @@ In [11]: print(planarity.ascii(edgelist))
  ---3----
 </pre>
 
+```python
+In [12]: planarity.draw(edgelist, outfileName='K5-minus-edge.png')
+```
+![K_5-minus-edge](/examples/classic/output/K5-minus-edge.png
+"Matplotlib render of $K_5$-minus-edge")
+
 Note that edge `(a, b)` would correspond to an edge between vertex indexes
 `(1, 2)`, which is not present in the drawing of this planar graph.
 
