@@ -605,11 +605,19 @@ cdef class PGraph:
         if outfileName:
             plt.savefig(outfileName, dpi=fig.dpi)
 
-    def write(self, str path='stdout', int writeMode=cplanarity.WRITE_ADJLIST) -> None:
+    def write(
+        self, str path='stdout', int writeMode=cplanarity.WRITE_ADJLIST
+    ) -> None:
         """Writes the graph to ``path``.
 
-        Supports writing in formats: WRITE_ADJLIST, WRITE_ADJMATRIX, and WRITE_G6.
+        Supports writing in formats: ``WRITE_ADJLIST``, ``WRITE_ADJMATRIX``, and
+        ``WRITE_G6``.
 
+        Args:
+            path (str): Path to which to write graph. Defaults to ``stdout``
+                stream.
+            writeMode (int): Format to write the graph. Defaults to
+                ``WRITE_ADJLIST``.
         Raises:
             RuntimeError: if the C-layer ``gp_Write()`` failed.
         """
